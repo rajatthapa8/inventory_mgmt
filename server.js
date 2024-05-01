@@ -6,12 +6,13 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const userRoute = require("./routes/userRoute");
-
+const errorHandler = require("./middlewares/errorMiddleware");
+const cookieParser = require("cookie-parser");
 //middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
+app.use(cookieParser());
 //routes middleware
 app.use("/api/users", userRoute);
 
@@ -19,6 +20,9 @@ app.use("/api/users", userRoute);
 app.get("/", (req, res) => {
   res.send("This is homepage");
 });
+
+//error middleware
+app.use(errorHandler);
 
 //connection to Mongo DB
 mongoose
