@@ -6,6 +6,7 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const userRoute = require("./routes/userRoute");
+const customerRoute = require("./routes/customerRoute");
 const errorHandler = require("./middlewares/errorMiddleware");
 const cookieParser = require("cookie-parser");
 //middlewares
@@ -15,7 +16,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 //routes middleware
 app.use("/api/users", userRoute);
-
+app.use("/api/customer", customerRoute);
 //routes
 app.get("/", (req, res) => {
   res.send("This is homepage");

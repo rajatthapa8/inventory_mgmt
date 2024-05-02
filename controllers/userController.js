@@ -123,6 +123,7 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 });
 
+//logout user
 const logoutUser = asyncHandler(async (req, res) => {
   res.cookie("token", "", {
     path: "/",
@@ -136,4 +137,65 @@ const logoutUser = asyncHandler(async (req, res) => {
   });
 });
 
-module.exports = { registerUser, loginUser, logoutUser };
+//get user data from db for user profile page
+const getUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (user) {
+    const { _id, name, email, phone } = user;
+    res.status(201).json({
+      _id,
+      name,
+      email,
+      phone,
+    });
+  } else {
+    res.status(400);
+    throw new Error("User not found");
+  }
+});
+
+//controller to check wheather if a user is logged in or not kinda like session
+
+const loggedIn = asyncHandler(async (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    res.json(false);
+  }
+  //verify the web token
+  const verified = jwt.verify(token, process.env.JWT_SECRET);
+  if (verified) {
+    return res.json(true);
+  } else {
+    return res.json(false);
+  }
+  next();
+});
+
+//controller to edit profile
+const updateUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user._id); //for reference we have the data of current logged in user from authMiddleware in user object
+  if (user) {
+    const { name, phone, email } = user;
+    user.email = email;
+    user.name = req.body.name || name;
+    user.phone = req.body.phone || phone;
+    const updatedUser = await user.save();
+    res.status(201).json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+    });
+  } else {
+    res.status(400);
+    throw new Error("User not found");
+  }
+});
+module.exports = {
+  registerUser,
+  loginUser,
+  logoutUser,
+  getUser,
+  loggedIn,
+  updateUser,
+};
